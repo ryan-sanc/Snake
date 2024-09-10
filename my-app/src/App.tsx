@@ -76,11 +76,44 @@ function App() {
     setGameOver(false);
   }
 
-  function checkCollision(head: number[]) { }
+  function checkCollision(head: number[]) {
+    for (let i = 0; i < head.length; i++) {
+      if (head[i] < 0 || head[i] * scale >= canvasX) return true;
+    }
+    for (const s of snake) {
+      if (head[0] === s[0] && head[1] === s[1]) return true;
+    }
+    return false;
+  }
 
-  function appleAte(newSnake: number[][]) { }
+  function appleAte(newSnake: number[][]) {
+    let coord = apple.map(() => Math.floor((Math.random() * canvasX) / scale));
+    if (newSnake[0][0] === apple[0] && newSnake[0][1] === apple[1]) {
+      let newApple = coord;
+      setScore(score + 1);
+      setApple(newApple);
+      return true;
+    }
+    return false;
+  }
 
-  function runGame() { }
+  function runGame() {
+    const newSnake = [...snake];
+    const newSnakeHead = [
+      newSnake[0][0] + direction[0],
+      newSnake[0][1] + direction[1],
+    ];
+    newSnake.unshift(newSnakeHead);
+    if (checkCollision(newSnakeHead)) {
+      setDelay(null);
+      setGameOver(true);
+      handleSetScore();
+    }
+    if (!appleAte(newSnake)) {
+      newSnake.pop();
+    }
+    setSnake(newSnake);
+  }
 
   function changeDirection(e: React.KeyboardEvent<HTMLDivElement>) {
     switch (e.key) {
