@@ -65,17 +65,40 @@ function App() {
       }
     }
   }, [snake, apple, gameOver]);
-  function handleSetScore() {}
+  function handleSetScore() { }
 
-  function play() {}
+  function play() {
+    setSnake(initialSnake);
+    setApple(initialApple);
+    setDirection([1, 0]);
+    setDelay(timeDelay);
+    setScore(0);
+    setGameOver(false);
+  }
 
-  function checkCollision(head: number[]) {}
+  function checkCollision(head: number[]) { }
 
-  function appleAte(newSnake: number[][]) {}
+  function appleAte(newSnake: number[][]) { }
 
-  function runGame() {}
+  function runGame() { }
 
-  function changeDirection(e: React.KeyboardEvent<HTMLDivElement>) {}
+  function changeDirection(e: React.KeyboardEvent<HTMLDivElement>) {
+    switch (e.key) {
+      case "ArrowLeft":
+        // Prevent reversing direction
+        if (direction[0] !== 1) setDirection([-1, 0]);
+        break;
+      case "ArrowUp":
+        if (direction[1] !== 1) setDirection([0, -1]);
+        break;
+      case "ArrowRight":
+        if (direction[0] !== -1) setDirection([1, 0]);
+        break;
+      case "ArrowDown":
+        if (direction[1] !== -1) setDirection([0, 1]);
+        break;
+    }
+  }
   return (
     <div onKeyDown={(e) => changeDirection(e)}>
       <img id="fruit" src={AppleLogo} alt="fruit" width="30" />
