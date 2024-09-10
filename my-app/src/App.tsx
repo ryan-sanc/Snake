@@ -5,10 +5,12 @@ import Monitor from "./oldMonitor.png";
 import "./App.css";
 const canvasX = 1000;
 const canvasY = 1000;
-const initSnake = [
-  [6, 9],
-  [6, 9],
+
+const initialLSnake = [
+  [4, 10],
+  [4, 10],
 ];
+
 const initialApple = [14, 10];
 const scale = 50;
 const timeDelay = 100;
