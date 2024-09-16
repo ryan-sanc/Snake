@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useInterval } from "usehooks-ts";
 import AppleLogo from "./applePixels.png";
 import Monitor from "./oldMonitor.png";
+import Wall from "./wall.jpg";
 import "./App.css";
 const canvasX = 1000;
 const canvasY = 1000;
@@ -11,9 +12,15 @@ const initialSnake = [
   [4, 10],
 ];
 
-const initialApple = [14, 10];
+const initialApple = [7, 10];
 const scale = 50;
 const timeDelay = 100;
+
+const initialWalls = [
+  [3, 5],[4, 5], [5, 5], [6, 5], [6, 4], [6,3],
+  [10, 15], [11, 15], [12,15], [13,15], [14, 15], [15,15], [16,15],
+  [14,14], [14,13], [14,12], [14, 11], [14,10]
+]
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -23,10 +30,12 @@ function App() {
   const [delay, setDelay] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [walls, setWalls] = useState(initialWalls);
 
   useInterval(() => runGame(), delay);
   useEffect(() => {
     let fruit = document.getElementById("fruit") as HTMLCanvasElement;
+    let wallImage = document.getElementById("wallImage") as HTMLCanvasElement;
     if (canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
@@ -58,15 +67,22 @@ function App() {
           } else {
             // Body of the snake
             ctx.fillStyle = "#8FBC8F"; // medium green color for the body
-            ctx.fillRect(x, y, 1, 1); // Draw the body segment as a square
+            ctx.fillRect(x+0.05, y+0.05, 0.9, 0.9); // Draw the body segment as a square
           }
         });
 
         // Draw the fruit (apple)
         ctx.drawImage(fruit, apple[0], apple[1], 1, 1);
+
+        walls.forEach(([x, y],) => 
+          ctx.drawImage(wallImage, x, y, 1, 1));
       }
     }
   }, [snake, apple, gameOver]);
+
+  function randomizeWall() {
+
+  }
   function handleSetScore() { }
 
   function play() {
@@ -79,17 +95,41 @@ function App() {
   }
 
   function checkCollision(head: number[]) {
-    for (let i = 0; i < head.length; i++) {
-      if (head[i] < 0 || head[i] * scale >= canvasX) return true;
-    }
+    // for (let i = 0; i < head.length; i++) {
+    //   if (head[i] < 0 || head[i] * scale >= canvasX) return true;
+    // }
     for (const s of snake) {
       if (head[0] === s[0] && head[1] === s[1]) return true;
+    }
+
+    for (let w of walls){
+      if (head[0] === w[0] && head[1] === w[1]) return true;
     }
     return false;
   }
 
+  function randomizeAppleCoord() {
+    let newCoord;
+    let isValid;
+    do {
+      isValid = true;
+      newCoord = apple.map(() => Math.floor((Math.random() * canvasX) / scale));
+      for (let w of walls)
+        if (newCoord[0] === w[0] && newCoord[1] === w[1]){
+          isValid = false;
+          continue;
+        }
+      for (let s of snake)
+        if (newCoord[0] === s[0] && newCoord[1] === s[1]){
+          isValid = false;
+          continue;
+        }
+    } while (!isValid);
+    return newCoord;
+  }
+
   function appleAte(newSnake: number[][]) {
-    let coord = apple.map(() => Math.floor((Math.random() * canvasX) / scale));
+    let coord = randomizeAppleCoord();
     if (newSnake[0][0] === apple[0] && newSnake[0][1] === apple[1]) {
       let newApple = coord;
       setScore(score + 1);
@@ -105,6 +145,16 @@ function App() {
       newSnake[0][0] + direction[0],
       newSnake[0][1] + direction[1],
     ];
+    if (newSnakeHead[0] < 0)
+      newSnakeHead[0] = Math.floor(canvasX / scale);
+    else if (newSnakeHead[0] * scale >= canvasX)
+      newSnakeHead[0] = 0;
+
+    if (newSnakeHead[1] < 0)
+      newSnakeHead[1] = Math.floor(canvasY / scale);
+    else if (newSnakeHead[1] * scale >= canvasY)
+      newSnakeHead[1] = 0;
+      
     newSnake.unshift(newSnakeHead);
     if (checkCollision(newSnakeHead)) {
       setDelay(null);
@@ -137,6 +187,7 @@ function App() {
   return (
     <div onKeyDown={(e) => changeDirection(e)}>
       <img id="fruit" src={AppleLogo} alt="fruit" width="30" />
+      <img id="wallImage" src={Wall} alt="wallImage" width="0" />
       <img src={Monitor} alt="fruit" width="4000" className="monitor" />
       <canvas
         className="playArea"
@@ -155,3 +206,5 @@ function App() {
     </div>
   );
 }
+
+export default App;
